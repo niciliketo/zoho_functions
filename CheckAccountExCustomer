@@ -52,8 +52,7 @@ else
 	{
 		if(accountType != "Customer")
 		{
-			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"Customer"});
-			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Start_Date":today});
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"Customer","Start_Date":today});
 			info update;
 		}
 	}
@@ -61,8 +60,7 @@ else
 	{
 		if(accountType != "Sleeping Customer")
 		{
-			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"Sleeping Customer"});
-			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Sleeping_Customer_Churn_Date":today});
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"Sleeping Customer","Sleeping_Customer_Churn_Date":today});
 			info update;
 		}
 	}
@@ -70,8 +68,7 @@ else
 	{
 		if(accountType != "ex-Customer")
 		{
-			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"ex-Customer"});
-			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Churn_Date":today});
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"ex-Customer","Churn_Date":today});
 			info update;
 		}
 	}
