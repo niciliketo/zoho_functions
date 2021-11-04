@@ -1,0 +1,78 @@
+account = zoho.crm.getRecordById("Accounts",acctId.toLong());
+accountType = account.get("Account_Type");
+accountName = account.get("Account_Name");
+info "Account Type: " + accountType;
+info "Account Name: " + accountName;
+if({"xxx","xxy","xyy","yyy"}.contains(accountType))
+{
+	info "Not gonna run";
+}
+else if({"HMRC","Technology Strategy Board","West of England LEP Growth Fund","Talented Talkers","Tegus"}.contains(accountName))
+{
+	info "Still Not gonna run";
+}
+else
+{
+	relateddeals = zoho.crm.getRelatedRecords("Deals","Accounts",acctId.toLong());
+	relatedClosedWonDeals = list();
+	//loop to get just closed potentials over 0;
+	for each  ele in relateddeals
+	{
+		info "Potential Amount: " + ele.get("Amount");
+		if(ele.get("Stage") == "Closed Won" && ele.get("Amount").toLong() > 0)
+		{
+			relatedClosedWonDeals.add(ele);
+		}
+	}
+	// count is variable to obtain # potentials closed won, > £0 and live
+	count = 0;
+	// count sleeping is to cound # potentials closed won, > £0 and less than a year after expiring
+	countSleeping = 0;
+	info "Number of potentials: " + relateddeals.size();
+	info "Number of potentials that match criteria: " + relatedClosedWonDeals.size();
+	// lop over deals and count how many of each type we have.  
+	for each  ele in relatedClosedWonDeals
+	{
+		potentialExpiryDate = ifnull(ele.get("Potential_Expiration_Date"),"");
+		info potentialExpiryDate;
+		if(potentialExpiryDate != "" && potentialExpiryDate.toDate() > today.toDate())
+		{
+			count = count + 1;
+		}
+		else if(potentialExpiryDate != "" && potentialExpiryDate.toDate().addYear(1) > today.toDate())
+		{
+			countSleeping = countSleeping + 1;
+		}
+	}
+	info "Count of future potentials: " + count;
+	info "Count of sleeping potentials: " + countSleeping;
+	// for an account with deals - 
+	// if a live deal then customer, and then if not loks at sleeping and then if no they will be ex-customer
+	if(count > 0)
+	{
+		if(accountType != "Customer")
+		{
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"Customer"});
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Start_Date":today});
+			info update;
+		}
+	}
+	else if(countSleeping > 0)
+	{
+		if(accountType != "Sleeping Customer")
+		{
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"Sleeping Customer"});
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Sleeping_Customer_Churn_Date":today});
+			info update;
+		}
+	}
+	else if(relatedClosedWonDeals.size() > 0)
+	{
+		if(accountType != "ex-Customer")
+		{
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Account_Type":"ex-Customer"});
+			update = zoho.crm.updateRecord("Accounts",acctId.toLong(),{"Churn_Date":today});
+			info update;
+		}
+	}
+}
